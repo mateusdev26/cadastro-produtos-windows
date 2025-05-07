@@ -1,6 +1,8 @@
 package domain;
 
 import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Objects;
 
 public class Produto implements Serializable {
@@ -28,18 +30,19 @@ public class Produto implements Serializable {
 
     @Override
     public String toString() {
-        int larguraEntreAsColunas = 20 ;
+        final int larguraEntreAsColunas = 30 ;
         int tamanhoNome = this.nome.toCharArray().length;
         int tamanhoPreço = Double.toString(this.preco).toCharArray().length;
-        int  tamanhoQuantidade = this.quantidade;
+        int  tamanhoQuantidade = Integer.toString(this.quantidade).toCharArray().length;
         String inicio = "| "+this.nome+"";
         StringBuilder sb = new StringBuilder(inicio);
 
         for (int i = 0; i < larguraEntreAsColunas - tamanhoNome; i++) {
             sb.append(" ");
         }
-        sb.append("| "+"R$"+preco);
-        for (int i = 0 ; i < larguraEntreAsColunas - tamanhoPreço ;i++){
+        String precoFormatado = NumberFormat.getCurrencyInstance(Locale.forLanguageTag("pt-BR")).format(this.preco);
+        sb.append("| "+precoFormatado);
+        for (int i = 0 ; i < (larguraEntreAsColunas - tamanhoPreço)-1 ;i++){
             sb.append(" ");
         }
         sb.append("| "+quantidade);
@@ -48,9 +51,9 @@ public class Produto implements Serializable {
         }
         sb.append('|');
         sb.append('\n');
-        for (int i = 0; i < 68; i++) {
-            sb.append("_");
-        }
+
+            sb.append("_".repeat(99));
+
         return sb.toString() ;
     }
 

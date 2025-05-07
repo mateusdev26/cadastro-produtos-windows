@@ -3,8 +3,8 @@ package main;
 import domain.Produto;
 import service.ProdutoService;
 
-import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -17,7 +17,7 @@ public class Main {
             clear();
             menu();
             System.out.print(">> ");
-            try  {
+            try {
                 choice = scanner.nextInt();
                 scanner.nextLine();
                 switch (choice) {
@@ -28,7 +28,7 @@ public class Main {
                         System.out.println("==========Adicionar==========");
                         System.out.println("Digite o nome do produto");
                         String nome = scanner.nextLine();
-                        System.out.print("Digite o preço do produto"+'\n');
+                        System.out.print("Digite o preço do produto" + '\n');
                         double preco = scanner.nextDouble();
                         scanner.nextLine();
                         Produto novoProduto = Produto.builder()
@@ -52,22 +52,27 @@ public class Main {
                         break;
                     case 2:
                         map = ProdutoService.unser();
+                        clear();
                         System.out.println("==========Remover==========");
-                        System.out.println("Digite o nome");
+                        System.out.println("Digite o nome, enter para cancelar");
                         String nomeRemov = scanner.nextLine();
-                        System.out.println("Digite a quantidade , maximo :'"+map.get(nomeRemov).getFirst().getQuantidade()+"'");
-                        int quantidade = scanner.nextInt();
-                        if (quantidade >= map.get(nomeRemov).getFirst().getQuantidade()){
-                            map.remove(nomeRemov);
-                        }else {
-                            map.get(nomeRemov).getFirst().setQuantidade(map.get(nomeRemov).getFirst().getQuantidade() - quantidade);
+                        if (!nomeRemov.trim().isEmpty()) {
+
+                            System.out.println("Digite a quantidade , maximo :'" + map.get(nomeRemov).getFirst().getQuantidade() + "'");
+                            int quantidade = scanner.nextInt();
+                            if (quantidade >= map.get(nomeRemov).getFirst().getQuantidade()) {
+                                map.remove(nomeRemov);
+                            } else {
+                                map.get(nomeRemov).getFirst().setQuantidade(map.get(nomeRemov).getFirst().getQuantidade() - quantidade);
+                            }
+                        } else{
+                            System.out.println("Cancelando...");
+                            TimeUnit.MILLISECONDS.sleep(250);
                         }
                         ProdutoService.ser(map);
                         break;
                     case 3:
-                        listAll(map.values().stream()
-                                        .flatMap(List::stream)
-                                        .collect(Collectors.toList()));
+                        listAll();
                         System.out.println();
                         System.out.println("Aperte enter para sair");
                         scanner.nextLine();
@@ -77,6 +82,8 @@ public class Main {
                         break;
                 }
             } catch (NoSuchElementException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
@@ -94,23 +101,28 @@ public class Main {
     }
 
     private static void clear() {
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         System.out.println();
     }
 
-    private static void listAll(List<Produto> produtos) {
-        System.out.print("_".repeat(68) + "\n");
-        System.out.println("|                     |                       |                     |");
-        System.out.println("| NOME                | PREÇO                 | QUANTIDADE          |");
-        System.out.println("|                     |                       |                     |");
-        System.out.print("_".repeat(68) + '\n');
-        for (Produto produto : produtos) {
+    private static void listAll() {
+
+        System.out.print("_".repeat(99) + "\n");
+        System.out.println("|                               |                                 |                               |");
+        System.out.println("| NOME                          | PREÇO                           | QUANTIDADE                    |");
+        System.out.println("|                               |                                 |                               |");
+        System.out.print("_".repeat(99) + '\n');
+        Map<String, List<Produto>> produtos = ProdutoService.unser();
+        List<Produto> collect = produtos.values().stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+        for (Produto produto : collect) {
             System.out.println(produto.toString());
         }
 
